@@ -263,7 +263,7 @@
                 '<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
                   '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0H17M9 19.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm11 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path>' +
                 '</svg>' +
-                (count>0 ? '<span class="absolute -top-2 -right-2 bg-yellow-400 text-blue-900 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">'+count+'</span>':'') +
+                (getCartItemCount()>0 ? '<span class="absolute -top-2 -right-2 bg-yellow-400 text-blue-900 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">'+getCartItemCount()+'</span>':'') +
               '</div>' +
             '</div>' +
           '</div>' +
@@ -286,7 +286,7 @@
     }
 
     function filtersBar() {
-      var pills = categories.map(function(cat, idx){
+      var pills = categories.map(function(cat){
         var active = (cat === activeCategory);
         var cls = active ? 'pill pill-active' : 'pill pill-idle';
         return '<button onclick="activeCategory=\''+cat+'\'; render();" class="'+cls+'">' + cat + '</button>';
@@ -423,7 +423,6 @@
     }
 
     function adminInventorySection(){
-      // list items with delete, and add form
       var options = ['Shirts','Bottoms','Dresses','Winter','Accessories']
         .map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join('');
 
@@ -504,7 +503,8 @@
             '<button onclick="currentView = \'shop\'; render();" class="btn-primary px-4 py-2 rounded-lg">Back to Shop</button>' +
           '</div>' +
         '</div>' +
-        + adminInventorySection() +
+        ' ' +  /* spacer to avoid accidental "+string" type coercion issues */
+        adminInventorySection() +
         '<div class="card p-6">' +
           '<h2 class="text-xl font-semibold mb-4 text-gray-900">Orders ('+orders.length+')</h2>' +
           '<div class="space-y-4">' + ordersHtml + '</div>' +
