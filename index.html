@@ -17,7 +17,8 @@
         // App State
         var currentView = 'shop';
         var cart = {};
-        var customerInfo = { name: '', whatsapp: '' };
+        // ADDED: childClass + notes
+        var customerInfo = { name: '', whatsapp: '', childClass: '', notes: '' };
         var orders = [];
         var isSubmitting = false;
         var showSuccessMessage = false;
@@ -50,6 +51,9 @@
                 time: order.time,
                 customer_name: order.customer.name,
                 customer_whatsapp: order.customer.whatsapp,
+                // ADDED: class + notes to payload
+                child_class: order.customer.childClass || '',
+                notes: order.customer.notes || '',
                 items: Object.values(order.items).map(function(item) {
                     return item.quantity + 'x ' + item.name + ' (Size ' + item.size + ') - $' + item.price;
                 }).join('\n'),
@@ -128,7 +132,8 @@
             sendToGoogleSheets(order);
             
             cart = {};
-            customerInfo = { name: '', whatsapp: '' };
+            // ADDED: reset new fields too
+            customerInfo = { name: '', whatsapp: '', childClass: '', notes: '' };
             
             setTimeout(function() {
                 isSubmitting = false;
@@ -281,6 +286,20 @@
                                     '</svg>' +
                                     '<input type="text" placeholder="WhatsApp number" value="' + customerInfo.whatsapp + '" onchange="customerInfo.whatsapp = this.value" class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm">' +
                                 '</div>' +
+                                <!-- ADDED: Child's class -->
+                                '<div class="flex items-center space-x-2">' +
+                                    '<svg class="text-blue-600 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>' +
+                                    '</svg>' +
+                                    '<input type="text" placeholder="Child\'s class (e.g., 1B)" value="' + (customerInfo.childClass || '') + '" onchange="customerInfo.childClass = this.value" class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm">' +
+                                '</div>' +
+                                <!-- ADDED: Notes -->
+                                '<div class="flex items-start space-x-2">' +
+                                    '<svg class="text-blue-600 w-5 h-5 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16h8M8 12h8M8 8h8M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H9l-4 4v10a2 2 0 002 2z"></path>' +
+                                    '</svg>' +
+                                    '<textarea placeholder="Notes (e.g., prefer navy, specific sizes, pickup day)" onchange="customerInfo.notes = this.value" class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm" rows="3">' + (customerInfo.notes || '') + '</textarea>' +
+                                '</div>' +
                             '</div>' +
                             
                             '<div class="space-y-3 mb-4 max-h-64 overflow-y-auto">' +
@@ -381,6 +400,9 @@
                                             '<div>' +
                                                 '<h3 class="font-semibold">' + order.customer.name + '</h3>' +
                                                 '<p class="text-sm text-gray-600">WhatsApp: ' + order.customer.whatsapp + '</p>' +
+                                                // ADDED: show Child's class + Notes
+                                                (order.customer.childClass ? '<p class="text-sm text-gray-600">Class: ' + order.customer.childClass + '</p>' : '') +
+                                                (order.customer.notes ? '<p class="text-sm text-gray-600">Notes: ' + order.customer.notes + '</p>' : '') +
                                                 '<p class="text-sm text-gray-600">Date: ' + order.date + ' at ' + order.time + '</p>' +
                                             '</div>' +
                                             '<div class="text-right">' +
