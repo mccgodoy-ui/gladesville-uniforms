@@ -1,5 +1,5 @@
 // Google Sheets Integration
-        const GOOGLE_SCRIPT_URL = 'const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz1SLkZ8g9eeNHcUXJUjra2igAaO5aLF...';'; // Replace this with your Apps Script URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzn1SLkZ8g9eeNHcUXJUjra2igAaO5aLFNWxai06H4z6YjW0gluDyUZkTUTRsYIUMf_3g/exec'; // Replace this with your Apps Script URL
 
         function sendToGoogleSheets(order) {
             const orderData = {
@@ -52,6 +52,8 @@
         let cart = {};
         let customerInfo = { name: '', whatsapp: '' };
         let orders = [];
+        let isSubmitting = false; // Add loading state
+        let showSuccessMessage = false; // Add success state
         let inventory = [
             { id: 1, name: 'Polo Shirt', price: 2, category: 'Shirts' },
             { id: 2, name: 'Long Sleeve Polo', price: 2, category: 'Shirts' },
@@ -335,13 +337,37 @@ We will contact you via WhatsApp with photos and payment details.`);
                                 ` : ''}
 
                                 <!-- Submit Button -->
+                                ${showSuccessMessage ? `
+                                    <div class="w-full bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4 text-center">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <span class="font-semibold">Order Submitted Successfully!</span>
+                                        </div>
+                                        <p class="text-sm mt-1">We'll contact you via WhatsApp with photos and payment details.</p>
+                                    </div>
+                                ` : ''}
+                                
                                 <button onclick="submitOrder()" 
-                                    ${!customerInfo.name || !customerInfo.whatsapp || Object.keys(cart).length === 0 ? 'disabled' : ''}
-                                    class="w-full ${!customerInfo.name || !customerInfo.whatsapp || Object.keys(cart).length === 0 ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'} text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                                    </svg>
-                                    <span>Submit Pre-Order</span>
+                                    ${!customerInfo.name || !customerInfo.whatsapp || Object.keys(cart).length === 0 || isSubmitting ? 'disabled' : ''}
+                                    class="w-full ${
+                                        isSubmitting ? 'bg-blue-400' :
+                                        !customerInfo.name || !customerInfo.whatsapp || Object.keys(cart).length === 0 ? 'bg-gray-400' : 
+                                        'bg-blue-600 hover:bg-blue-700'
+                                    } text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                                    ${isSubmitting ? `
+                                        <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <span>Submitting...</span>
+                                    ` : `
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                        </svg>
+                                        <span>Submit Pre-Order</span>
+                                    `}
                                 </button>
                             </div>
                         </div>
