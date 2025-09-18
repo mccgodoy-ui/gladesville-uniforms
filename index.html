@@ -7,9 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root{
-      --brand-navy:#0f3d63;  /* header */
-      --brand-teal:#0f8b8d;  /* accents */
-      --brand-amber:#f59e0b; /* All pill */
+      --brand-navy:#0f3d63;
+      --brand-teal:#0f8b8d;
+      --brand-amber:#f59e0b;
     }
     .cart-item { animation: slideIn 0.2s ease-in-out; }
     @keyframes slideIn { from {opacity:.0; transform: translateY(6px)} to {opacity:1; transform: translateY(0)} }
@@ -33,7 +33,7 @@
   <div id="app"></div>
 
   <script>
-    /* ---------- STATE ---------- */
+    // Global state
     var currentView = 'shop';
     var cart = {};
     var customerInfo = { name:'', whatsapp:'', studentClass:'', notes:'' };
@@ -42,34 +42,26 @@
     var showSuccessMessage = false;
     var isAdminLoggedIn = false;
     var adminPassword = 'gladesville2024';
-
-    var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzn1SLkZ8g9eeNHcUXJUjra2igAaO5aLFNWxai06H4z6YjW0gluDyUZkTUTRsYIUMf_3g/exec';
+    var editingItemId = null;
 
     var INVENTORY_STORAGE_KEY = 'uniforms_inventory_v1';
 
-    // Default inventory (NO descriptions)
     var defaultInventory = [
-      // Shirts
       { id:1,  name:'Polo Shirt',       price:2, category:'Shirts' },
       { id:2,  name:'Long Sleeve Polo', price:2, category:'Shirts' },
-      // Bottoms
       { id:3,  name:'School Pants',     price:2, category:'Bottoms' },
       { id:4,  name:'Skort',            price:2, category:'Bottoms' },
       { id:8,  name:'Tracksuit Pants',  price:2, category:'Bottoms' },
       { id:14, name:'Shorts',           price:2, category:'Bottoms' },
       { id:15, name:'Sports Shorts',    price:2, category:'Bottoms' },
-      // Dresses
       { id:5,  name:'Summer Dress',     price:2, category:'Dresses' },
       { id:6,  name:'Winter Tunic',     price:2, category:'Dresses' },
-      // Winter
       { id:10, name:'Jumper',           price:5, category:'Winter' },
       { id:11, name:'Skivvy',           price:2, category:'Winter' },
-      // Accessories
       { id:12, name:'School Hat',       price:2, category:'Accessories' },
       { id:13, name:'School Bag',       price:5, category:'Accessories' }
     ];
 
-    // Load/save inventory so Admin edits persist locally
     function loadInventory(){
       try {
         var raw = localStorage.getItem(INVENTORY_STORAGE_KEY);
@@ -82,19 +74,14 @@
     }
 
     var inventory = loadInventory();
-
     var sizes = ['4','6','8','10','12','14','16'];
     var categories = ['All','Shirts','Bottoms','Dresses','Winter','Accessories'];
     var activeCategory = 'All';
-    var searchQuery = '';
 
-    /* ---------- HELPERS ---------- */
+    // Helper functions
     function filteredInventory() {
       return inventory.filter(function(item){
-        var matchesCategory = (activeCategory === 'All') || (item.category === activeCategory);
-        var q = (searchQuery||'').toLowerCase();
-        var matchesSearch = !q || item.name.toLowerCase().includes(q);
-        return matchesCategory && matchesSearch;
+        return (activeCategory === 'All') || (item.category === activeCategory);
       });
     }
 
@@ -135,25 +122,44 @@
       return lines.join('\n');
     }
 
-    function sendToGoogleSheets(order) {
-      var payload = {
-        date: order.date,
-        time: order.time,
-        customer_name: order.customer.name,
-        customer_whatsapp: order.customer.whatsapp,
-        student_class: order.customer.studentClass,
-        notes: order.customer.notes,
-        items: itemsListString(order.items),
-        total: order.total
-      };
+    function copyOrderToClipboard(order) {
+      var orderText = 'NEW UNIFORM ORDER\n' +
+        '================\n' +
+        'Customer: ' + order.customer.name + '\n' +
+        'WhatsApp: ' + order.customer.whatsapp + '\n' +
+        'Student Class: ' + order.customer.studentClass + '\n' +
+        'Date: ' + order.date + ' at ' + order.time + '\n' +
+        'Notes: ' + (order.customer.notes || 'None') + '\n\n' +
+        'ITEMS:\n' + itemsListString(order.items) + '\n\n' +
+        'TOTAL: $' + order.total;
+      
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(orderText).then(function(){
+          alert('Order details copied to clipboard!');
+        });
+      } else {
+        var textArea = document.createElement('textarea');
+        textArea.value = orderText;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('Order details copied to clipboard!');
+      }
+    }
 
-      fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).then(function(){ console.log('Sent to Google Sheets'); })
-        .catch(function(err){ console.error('Sheet error:', err); });
+    function sendEmailNotification(order) {
+      var subject = 'New Uniform Order - ' + order.customer.name;
+      var body = 'New uniform order received:\n\n' +
+        'Customer: ' + order.customer.name + '\n' +
+        'WhatsApp: ' + order.customer.whatsapp + '\n' +
+        'Student Class: ' + order.customer.studentClass + '\n' +
+        'Date: ' + order.date + ' at ' + order.time + '\n' +
+        'Notes: ' + (order.customer.notes || 'None') + '\n\n' +
+        'Items:\n' + itemsListString(order.items) + '\n\n' +
+        'Total: $' + order.total;
+      
+      return 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
     }
 
     function submitOrder() {
@@ -180,8 +186,6 @@
       };
 
       orders.push(order);
-      sendToGoogleSheets(order);
-
       cart = {};
       customerInfo = { name:'', whatsapp:'', studentClass:'', notes:'' };
 
@@ -197,45 +201,97 @@
 
     function attemptAdminLogin() {
       var password = prompt('Enter admin password:');
-      if (password === adminPassword) { isAdminLoggedIn = true; currentView = 'admin'; render(); }
-      else if (password !== null) alert('Incorrect password');
+      if (password === adminPassword) { 
+        isAdminLoggedIn = true; 
+        currentView = 'admin'; 
+        render(); 
+      } else if (password !== null) {
+        alert('Incorrect password');
+      }
     }
 
-    function adminLogout(){ isAdminLoggedIn = false; currentView = 'shop'; render(); }
-    function deleteOrder(orderId){ orders = orders.filter(function(o){ return o.id !== orderId; }); render(); }
+    function adminLogout(){ 
+      isAdminLoggedIn = false; 
+      currentView = 'shop'; 
+      render(); 
+    }
+
+    function deleteOrder(orderId){ 
+      orders = orders.filter(function(o){ return o.id !== orderId; }); 
+      render(); 
+    }
 
     function updateCustomerName(v){ customerInfo.name = v; }
     function updateCustomerWhatsApp(v){ customerInfo.whatsapp = v; }
     function updateStudentClass(v){ customerInfo.studentClass = v; }
     function updateNotes(v){ customerInfo.notes = v; }
 
-    /* ---------- ADMIN: INVENTORY MGMT ---------- */
+    // Admin functions
     function nextItemId(){
       var max = inventory.reduce(function(m,i){ return Math.max(m, i.id); }, 0);
       return max + 1;
     }
+
     function adminAddItem(){
       var name = (document.getElementById('adm_name').value || '').trim();
       var price = parseFloat(document.getElementById('adm_price').value || '0');
       var category = document.getElementById('adm_category').value;
-      if (!name || !category || isNaN(price)) { alert('Enter name, category and valid price.'); return; }
+      if (!name || !category || isNaN(price)) { 
+        alert('Enter name, category and valid price.'); 
+        return; 
+      }
       inventory.push({ id: nextItemId(), name:name, price:price, category:category });
       saveInventory();
       document.getElementById('adm_name').value = '';
       document.getElementById('adm_price').value = '';
       render();
     }
+
     function adminRemoveItem(id){
       inventory = inventory.filter(function(i){ return i.id !== id; });
       saveInventory();
       render();
     }
 
-    /* ---------- UI ---------- */
+    function adminStartEdit(id){
+      editingItemId = id;
+      render();
+    }
+
+    function adminCancelEdit(){
+      editingItemId = null;
+      render();
+    }
+
+    function adminSaveEdit(id){
+      var nameEl = document.getElementById('edit_name_' + id);
+      var priceEl = document.getElementById('edit_price_' + id);
+      var name = (nameEl.value || '').trim();
+      var price = parseFloat(priceEl.value || '0');
+      if (!name || isNaN(price)) { 
+        alert('Enter valid name and price.'); 
+        return; 
+      }
+      
+      var item = inventory.find(function(i){ return i.id === id; });
+      if (item) {
+        item.name = name;
+        item.price = price;
+        saveInventory();
+        editingItemId = null;
+        render();
+      }
+    }
+
+    // UI Functions
     function headerBar() {
-      var count = getCartItemCount();
-      return '' +
-      '<div class="bg-[var(--brand-navy)] text-white shadow-sm border-b-4 border-yellow-400">' +
+      var adminBadge = orders.length > 0 ? 
+        '<span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">' + orders.length + '</span>' : '';
+      
+      var cartBadge = getCartItemCount() > 0 ?
+        '<span class="absolute -top-2 -right-2 bg-yellow-400 text-blue-900 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">' + getCartItemCount() + '</span>' : '';
+
+      return '<div class="bg-[var(--brand-navy)] text-white shadow-sm border-b-4 border-yellow-400">' +
         '<div class="max-w-6xl mx-auto px-4 py-5">' +
           '<div class="flex items-center justify-between">' +
             '<div class="flex items-center gap-3">' +
@@ -257,13 +313,13 @@
                   '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>' +
                   '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>' +
                 '</svg>' +
-                (orders.length>0 ? '<span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">'+orders.length+'</span>':'') +
+                adminBadge +
               '</button>' +
               '<div class="relative" aria-label="Cart">' +
                 '<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
                   '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0H17M9 19.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm11 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path>' +
                 '</svg>' +
-                (getCartItemCount()>0 ? '<span class="absolute -top-2 -right-2 bg-yellow-400 text-blue-900 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">'+getCartItemCount()+'</span>':'') +
+                cartBadge +
               '</div>' +
             '</div>' +
           '</div>' +
@@ -272,13 +328,12 @@
     }
 
     function infoBanner() {
-      return '' +
-      '<div class="soft-panel p-6">' +
+      return '<div class="soft-panel p-6">' +
         '<h3 class="text-lg font-bold text-[var(--brand-navy)] mb-3 flex items-center gap-2"><span>How it works:</span></h3>' +
         '<ul class="text-gray-700 grid gap-2 text-sm">' +
           '<li>• Select items and sizes</li>' +
           '<li>• Submit your pre-order</li>' +
-          '<li>• We\'ll send photos via WhatsApp</li>' +
+          '<li>• We will send photos via WhatsApp</li>' +
           '<li>• Pay through Qkr! when ready</li>' +
           '<li>• Pickup at school (above lost property cage)</li>' +
         '</ul>' +
@@ -289,18 +344,14 @@
       var pills = categories.map(function(cat){
         var active = (cat === activeCategory);
         var cls = active ? 'pill pill-active' : 'pill pill-idle';
-        return '<button onclick="activeCategory=\''+cat+'\'; render();" class="'+cls+'">' + cat + '</button>';
+        return '<button onclick="setActiveCategory(\'' + cat + '\')" class="' + cls + '">' + cat + '</button>';
       }).join('');
-      return '' +
-      '<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">' +
-        '<div class="flex gap-2 flex-wrap">' + pills + '</div>' +
-        '<div class="relative w-full md:w-80">' +
-          '<svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">' +
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>' +
-          '</svg>' +
-          '<input value="'+(searchQuery||'')+'" oninput="searchQuery=this.value; render();" placeholder="Search uniforms..." class="w-full pl-9 pr-3 py-2 field bg-white"/>' +
-        '</div>' +
-      '</div>';
+      return '<div class="flex gap-2 flex-wrap justify-center">' + pills + '</div>';
+    }
+
+    function setActiveCategory(cat) {
+      activeCategory = cat;
+      render();
     }
 
     function productsGrid() {
@@ -309,24 +360,23 @@
 
       var cards = items.map(function(item){
         var sizeBtns = sizes.map(function(sz){
-          return '<button onclick="addToCart('+item.id+', \''+sz+'\')" class="chip chip-teal hover:brightness-95 transition">' + sz + '</button>';
+          return '<button onclick="addToCart(' + item.id + ', \'' + sz + '\')" class="chip chip-teal hover:brightness-95 transition">' + sz + '</button>';
         }).join(' ');
 
-        return '' +
-        '<div class="card p-5">' +
+        return '<div class="card p-5">' +
           '<div class="flex items-start justify-between mb-3">' +
             '<div>' +
-              '<h3 class="font-semibold text-gray-900 text-lg">'+item.name+'</h3>' +
-              '<span class="inline-block mt-1 text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">'+item.category+'</span>' +
+              '<h3 class="font-semibold text-gray-900 text-lg">' + item.name + '</h3>' +
+              '<span class="inline-block mt-1 text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">' + item.category + '</span>' +
             '</div>' +
-            '<span class="text-xl font-extrabold text-[#143a8a]">$'+item.price+'</span>' +
+            '<span class="text-xl font-extrabold text-[#143a8a]">$' + item.price + '</span>' +
           '</div>' +
           '<div class="text-sm text-gray-700 mb-2 font-medium">Select Size:</div>' +
           '<div class="flex flex-wrap gap-2">' + sizeBtns + '</div>' +
         '</div>';
       }).join('');
 
-      return '<div class="grid grid-cols-1 md:grid-cols-2 gap-5">'+cards+'</div>';
+      return '<div class="grid grid-cols-1 md:grid-cols-2 gap-5">' + cards + '</div>';
     }
 
     function cartSidebar() {
@@ -334,80 +384,66 @@
       var total = getCartTotal();
       var disabled = !customerInfo.name || !customerInfo.whatsapp || !customerInfo.studentClass || cartKeys.length === 0 || isSubmitting;
 
-      var itemsHtml = (cartKeys.length === 0)
-        ? '<div class="text-gray-500 text-sm text-center py-8"><div class="mb-2">🛒</div>No items in cart<br><span class="text-xs">Add some uniforms to get started</span></div>'
-        : cartKeys.map(function(k){
-            var it = cart[k];
-            return '' +
-            '<div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg cart-item">' +
-              '<div>' +
-                '<p class="text-sm font-semibold text-gray-900">' + it.name + '</p>' +
-                '<p class="text-xs text-gray-700">Size ' + it.size + '</p>' +
-              '</div>' +
-              '<div class="flex items-center gap-2">' +
-                '<button onclick="removeFromCart(\''+k+'\')" class="text-[var(--brand-navy)] hover:opacity-80" aria-label="Decrease">' +
-                  '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>' +
-                '</button>' +
-                '<span class="text-sm font-semibold text-gray-900">' + it.quantity + '</span>' +
-                '<button onclick="addToCart('+it.id+', \''+it.size+'\')" class="text-[var(--brand-navy)] hover:opacity-80" aria-label="Increase">' +
-                  '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path></svg>' +
-                '</button>' +
-              '</div>' +
-            '</div>';
-          }).join('');
+      var itemsHtml = (cartKeys.length === 0) ?
+        '<div class="text-gray-500 text-sm text-center py-8"><div class="mb-2">🛒</div>No items in cart<br><span class="text-xs">Add some uniforms to get started</span></div>' :
+        cartKeys.map(function(k){
+          var it = cart[k];
+          return '<div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg cart-item">' +
+            '<div>' +
+              '<p class="text-sm font-semibold text-gray-900">' + it.name + '</p>' +
+              '<p class="text-xs text-gray-700">Size ' + it.size + '</p>' +
+            '</div>' +
+            '<div class="flex items-center gap-2">' +
+              '<button onclick="removeFromCart(\'' + k + '\')" class="text-[var(--brand-navy)] hover:opacity-80" aria-label="Decrease">' +
+                '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>' +
+              '</button>' +
+              '<span class="text-sm font-semibold text-gray-900">' + it.quantity + '</span>' +
+              '<button onclick="addToCart(' + it.id + ', \'' + it.size + '\')" class="text-[var(--brand-navy)] hover:opacity-80" aria-label="Increase">' +
+                '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path></svg>' +
+              '</button>' +
+            '</div>' +
+          '</div>';
+        }).join('');
 
-      return '' +
-      '<div class="card p-6 sticky top-6">' +
+      var successMsg = showSuccessMessage ? 
+        '<div class="w-full bg-teal-50 border border-teal-400 text-teal-900 px-4 py-3 rounded-lg mb-4 text-center">' +
+          '<div class="font-semibold">Order Submitted Successfully!</div>' +
+          '<p class="text-sm mt-1">We will contact you via WhatsApp with photos and payment details.</p>' +
+        '</div>' : '';
+
+      var totalSection = cartKeys.length > 0 ?
+        '<div class="border-t pt-4 mb-4">' +
+          '<div class="flex items-center justify-between">' +
+            '<span class="font-semibold text-gray-900">Total:</span>' +
+            '<span class="text-2xl font-extrabold text-[#143a8a]">$' + total + '</span>' +
+          '</div>' +
+        '</div>' : '';
+
+      var buttonText = isSubmitting ? 
+        '<svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg><span>Submitting...</span>' :
+        '<span>Submit Pre-Order</span>';
+
+      var buttonClass = disabled ?
+        'w-full bg-gray-300 text-gray-600 cursor-not-allowed font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2' :
+        'w-full btn-primary font-semibold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2';
+
+      return '<div class="card p-6 sticky top-6">' +
         '<h2 class="text-xl font-semibold text-white bg-[var(--brand-teal)] -mx-6 -mt-6 px-6 py-3 rounded-t-[18px]">Your Order</h2>' +
         '<div class="space-y-3 mb-4 mt-4">' +
-          '<div class="flex items-center gap-2">' +
-            '<input type="text" placeholder="Your name *" value="'+(customerInfo.name||'')+'" onchange="updateCustomerName(this.value)" class="w-full field bg-white" />' +
-          '</div>' +
-          '<div class="flex items-center gap-2">' +
-            '<input type="text" placeholder="WhatsApp number *" value="'+(customerInfo.whatsapp||'')+'" onchange="updateCustomerWhatsApp(this.value)" class="w-full field bg-white" />' +
-          '</div>' +
-          '<div class="flex items-center gap-2">' +
-            '<input type="text" placeholder="Student class (e.g., 1A) *" value="'+(customerInfo.studentClass||'')+'" onchange="updateStudentClass(this.value)" class="w-full field bg-white" />' +
-          '</div>' +
-          '<div>' +
-            '<textarea placeholder="Notes (optional)" rows="3" onchange="updateNotes(this.value)" class="w-full field bg-white">'+(customerInfo.notes||'')+'</textarea>' +
-          '</div>' +
+          '<input type="text" placeholder="Your name *" value="' + (customerInfo.name||'') + '" onchange="updateCustomerName(this.value)" class="w-full field bg-white" />' +
+          '<input type="text" placeholder="WhatsApp number *" value="' + (customerInfo.whatsapp||'') + '" onchange="updateCustomerWhatsApp(this.value)" class="w-full field bg-white" />' +
+          '<input type="text" placeholder="Student class (e.g., 1A) *" value="' + (customerInfo.studentClass||'') + '" onchange="updateStudentClass(this.value)" class="w-full field bg-white" />' +
+          '<textarea placeholder="Notes (optional)" rows="3" onchange="updateNotes(this.value)" class="w-full field bg-white">' + (customerInfo.notes||'') + '</textarea>' +
         '</div>' +
-
         '<div class="space-y-3 mb-4 max-h-64 overflow-y-auto pr-1">' + itemsHtml + '</div>' +
-
-        (cartKeys.length>0 ? (
-          '<div class="border-t pt-4 mb-4">' +
-            '<div class="flex items-center justify-between">' +
-              '<span class="font-semibold text-gray-900">Total:</span>' +
-              '<span class="text-2xl font-extrabold text-[#143a8a]">$'+total+'</span>' +
-            '</div>' +
-          '</div>'
-        ) : '') +
-
-        (showSuccessMessage ? (
-          '<div class="w-full bg-teal-50 border border-teal-400 text-teal-900 px-4 py-3 rounded-lg mb-4 text-center">' +
-            '<div class="font-semibold">Order Submitted Successfully!</div>' +
-            '<p class="text-sm mt-1">We\'ll contact you via WhatsApp with photos and payment details.</p>' +
-          '</div>'
-        ) : '') +
-
-        (function(){
-          var cls = 'w-full btn-primary font-semibold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 ';
-          if (isSubmitting) cls += 'opacity-80'; else if (disabled) cls = 'w-full bg-gray-300 text-gray-600 cursor-not-allowed font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2';
-          return '<button onclick="submitOrder()" '+(disabled?'disabled':'')+' class="'+cls+'">' +
-            (isSubmitting
-              ? '<svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg><span>Submitting...</span>'
-              : '<span>Submit Pre-Order</span>'
-            ) +
-          '</button>';
-        })() +
+        totalSection +
+        successMsg +
+        '<button onclick="submitOrder()" ' + (disabled ? 'disabled' : '') + ' class="' + buttonClass + '">' + buttonText + '</button>' +
       '</div>';
     }
 
     function renderShopView() {
-      return '' +
-      headerBar() +
+      return headerBar() +
       '<div class="max-w-6xl mx-auto px-4 py-6">' +
         '<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">' +
           '<div class="lg:col-span-2 space-y-6">' +
@@ -424,92 +460,116 @@
 
     function adminInventorySection(){
       var options = ['Shirts','Bottoms','Dresses','Winter','Accessories']
-        .map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join('');
+        .map(function(c){ return '<option value="' + c + '">' + c + '</option>'; }).join('');
 
       var list = inventory.map(function(it){
-        return ''+
-        '<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">' +
-          '<div class="flex items-center gap-3">' +
-            '<span class="font-medium">'+it.name+'</span>' +
-            '<span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">'+it.category+'</span>' +
-          '</div>' +
-          '<div class="flex items-center gap-4">' +
-            '<span class="font-semibold text-[#143a8a]">$'+it.price+'</span>' +
-            '<button onclick="adminRemoveItem('+it.id+')" class="btn-danger px-3 py-1.5 rounded-lg text-sm">Remove</button>' +
-          '</div>' +
-        '</div>';
+        var isEditing = (editingItemId === it.id);
+        
+        if (isEditing) {
+          return '<div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border-2 border-blue-200">' +
+            '<div class="flex items-center gap-3 flex-1">' +
+              '<input id="edit_name_' + it.id + '" value="' + it.name + '" class="flex-1 field bg-white" placeholder="Item name"/>' +
+              '<input id="edit_price_' + it.id + '" value="' + it.price + '" type="number" step="0.01" class="w-20 field bg-white" placeholder="Price"/>' +
+              '<span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">' + it.category + '</span>' +
+            '</div>' +
+            '<div class="flex items-center gap-2">' +
+              '<button onclick="adminSaveEdit(' + it.id + ')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm">Save</button>' +
+              '<button onclick="adminCancelEdit()" class="bg-gray-400 text-white px-3 py-1.5 rounded-lg text-sm">Cancel</button>' +
+            '</div>' +
+          '</div>';
+        } else {
+          return '<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">' +
+            '<div class="flex items-center gap-3">' +
+              '<span class="font-medium">' + it.name + '</span>' +
+              '<span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">' + it.category + '</span>' +
+            '</div>' +
+            '<div class="flex items-center gap-4">' +
+              '<span class="font-semibold text-[#143a8a]">$' + it.price + '</span>' +
+              '<button onclick="adminStartEdit(' + it.id + ')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm">Edit</button>' +
+              '<button onclick="adminRemoveItem(' + it.id + ')" class="btn-danger px-3 py-1.5 rounded-lg text-sm">Remove</button>' +
+            '</div>' +
+          '</div>';
+        }
       }).join('');
 
-      return '' +
-      '<div class="card p-6">' +
-        '<h3 class="text-lg font-semibold text-gray-900 mb-4">Inventory ('+inventory.length+')</h3>' +
+      return '<div class="card p-6">' +
+        '<h3 class="text-lg font-semibold text-gray-900 mb-4">Inventory Management (' + inventory.length + ')</h3>' +
         '<div class="space-y-2 mb-5">' + (list || '<p class="text-sm text-gray-600">No items.</p>') + '</div>' +
         '<div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end bg-white rounded-xl p-4 border border-gray-100">' +
           '<div><label class="text-sm text-gray-600">Name</label><input id="adm_name" class="w-full field bg-white" placeholder="Item name"/></div>' +
           '<div><label class="text-sm text-gray-600">Price</label><input id="adm_price" type="number" step="0.01" class="w-full field bg-white" placeholder="2"/></div>' +
-          '<div><label class="text-sm text-gray-600">Category</label><select id="adm_category" class="w-full field bg-white">'+options+'</select></div>' +
+          '<div><label class="text-sm text-gray-600">Category</label><select id="adm_category" class="w-full field bg-white">' + options + '</select></div>' +
           '<div><button onclick="adminAddItem()" class="btn-primary w-full px-4 py-2 rounded-xl font-semibold">Add Item</button></div>' +
         '</div>' +
-        '<p class="text-xs text-gray-500 mt-2">Changes are saved locally in this browser. To share across admins, we can wire this to a Sheet later.</p>' +
+        '<p class="text-xs text-gray-500 mt-2">Click "Edit" to modify item name and price. Changes are saved locally.</p>' +
       '</div>';
     }
 
     function renderAdminView() {
       if (!isAdminLoggedIn) {
-        return '' +
-        '<div class="min-h-screen bg-gray-50 flex items-center justify-center">' +
+        return '<div class="min-h-screen bg-gray-50 flex items-center justify-center">' +
           '<div class="card p-8 text-center">' +
             '<h2 class="text-xl font-bold mb-4 text-gray-900">Access Denied</h2>' +
             '<p class="text-gray-700 mb-4">You need to login to access the admin area.</p>' +
             '<button onclick="attemptAdminLogin()" class="btn-primary px-6 py-2 rounded-lg mr-3">Login</button>' +
-            '<button onclick="currentView = \'shop\'; render()" class="bg-gray-600 text-white px-6 py-2 rounded-lg">Back to Shop</button>' +
+            '<button onclick="goToShop()" class="bg-gray-600 text-white px-6 py-2 rounded-lg">Back to Shop</button>' +
           '</div>' +
         '</div>';
       }
 
-      var ordersHtml = !orders.length
-        ? '<p class="text-gray-700">No orders yet</p>'
-        : orders.map(function(order){
-            var items = Object.keys(order.items).map(function(k){
-              var it = order.items[k];
-              return '<p class="text-sm text-gray-800">'+it.quantity+'x '+it.name+' (Size '+it.size+') - $'+it.price+' each</p>';
-            }).join('');
-            return '' +
-            '<div class="border border-gray-200 rounded-xl p-4 bg-white shadow-sm">' +
-              '<div class="flex items-start justify-between mb-3">' +
-                '<div>' +
-                  '<h3 class="font-semibold text-gray-900">'+order.customer.name+'</h3>' +
-                  '<p class="text-sm text-gray-700">WhatsApp: '+order.customer.whatsapp+'</p>' +
-                  '<p class="text-sm text-gray-700">Student Class: <span class="text-gray-900 font-medium">'+(order.customer.studentClass||'-')+'</span></p>' +
-                  (order.customer.notes ? '<p class="text-sm text-gray-700">Notes: '+order.customer.notes+'</p>':'' ) +
-                  '<p class="text-sm text-gray-700">Date: '+order.date+' at '+order.time+'</p>' +
-                '</div>' +
-                '<div class="text-right">' +
-                  '<p class="font-semibold text-lg text-[#143a8a]">$'+order.total+'</p>' +
-                  '<button onclick="deleteOrder('+order.id+')" class="btn-danger px-3 py-1.5 rounded-lg text-sm mt-2" aria-label="Delete">Delete</button>' +
+      var ordersHtml = !orders.length ?
+        '<p class="text-gray-700">No orders yet</p>' :
+        orders.map(function(order){
+          var items = Object.keys(order.items).map(function(k){
+            var it = order.items[k];
+            return '<p class="text-sm text-gray-800">' + it.quantity + 'x ' + it.name + ' (Size ' + it.size + ') -  + it.price + ' each</p>';
+          }).join('');
+          
+          var mailtoLink = sendEmailNotification(order);
+          var whatsappNum = order.customer.whatsapp.replace(/[^0-9]/g, "");
+          
+          return '<div class="border border-gray-200 rounded-xl p-4 bg-white shadow-sm">' +
+            '<div class="flex items-start justify-between mb-3">' +
+              '<div>' +
+                '<h3 class="font-semibold text-gray-900">' + order.customer.name + '</h3>' +
+                '<p class="text-sm text-gray-700">WhatsApp: <a href="https://wa.me/' + whatsappNum + '" target="_blank" class="text-green-600 font-medium hover:underline">' + order.customer.whatsapp + '</a></p>' +
+                '<p class="text-sm text-gray-700">Student Class: <span class="text-gray-900 font-medium">' + (order.customer.studentClass || '-') + '</span></p>' +
+                (order.customer.notes ? '<p class="text-sm text-gray-700">Notes: ' + order.customer.notes + '</p>' : '') +
+                '<p class="text-sm text-gray-700">Date: ' + order.date + ' at ' + order.time + '</p>' +
+              '</div>' +
+              '<div class="text-right">' +
+                '<p class="font-semibold text-lg text-[#143a8a]"> + order.total + '</p>' +
+                '<div class="flex gap-2 mt-2">' +
+                  '<button onclick="copyOrderToClipboard(orders[' + orders.indexOf(order) + '])" class="bg-blue-600 text-white px-2 py-1 rounded text-xs" title="Copy to clipboard">Copy</button>' +
+                  '<a href="' + mailtoLink + '" class="bg-green-600 text-white px-2 py-1 rounded text-xs">Email</a>' +
+                  '<button onclick="deleteOrder(' + order.id + ')" class="btn-danger px-2 py-1 rounded text-xs" aria-label="Delete">Delete</button>' +
                 '</div>' +
               '</div>' +
-              '<div class="space-y-1">'+items+'</div>' +
-            '</div>';
-          }).join('');
+            '</div>' +
+            '<div class="space-y-1">' + items + '</div>' +
+          '</div>';
+        }).join('');
 
-      return '' +
-      headerBar() +
+      return headerBar() +
       '<div class="max-w-6xl mx-auto px-4 py-6 space-y-6">' +
         '<div class="card p-5 flex items-center justify-between">' +
           '<h1 class="text-2xl font-bold text-gray-900">Admin Panel</h1>' +
           '<div class="space-x-2">' +
             '<button onclick="adminLogout()" class="btn-danger px-4 py-2 rounded-lg">Logout</button>' +
-            '<button onclick="currentView = \'shop\'; render();" class="btn-primary px-4 py-2 rounded-lg">Back to Shop</button>' +
+            '<button onclick="goToShop()" class="btn-primary px-4 py-2 rounded-lg">Back to Shop</button>' +
           '</div>' +
         '</div>' +
-        ' ' +  /* spacer to avoid accidental "+string" type coercion issues */
         adminInventorySection() +
         '<div class="card p-6">' +
-          '<h2 class="text-xl font-semibold mb-4 text-gray-900">Orders ('+orders.length+')</h2>' +
+          '<h2 class="text-xl font-semibold mb-4 text-gray-900">Orders (' + orders.length + ')</h2>' +
           '<div class="space-y-4">' + ordersHtml + '</div>' +
         '</div>' +
       '</div>';
+    }
+
+    function goToShop() {
+      currentView = 'shop';
+      render();
     }
 
     function render() {
@@ -517,6 +577,7 @@
       root.innerHTML = (currentView === 'admin') ? renderAdminView() : renderShopView();
     }
 
+    // Initialize the app
     render();
   </script>
 </body>
