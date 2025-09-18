@@ -35,9 +35,9 @@
 
   <script>
     // EmailJS Configuration - Replace with your actual values
-    var EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID';
+    var EMAILJS_SERVICE_ID = 'service_z6psqlh';
     var EMAILJS_TEMPLATE_ID = 'template_6t31ggp';
-    var EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY';
+    var EMAILJS_PUBLIC_KEY = 'SqZoo_2xHoSq2VLVb';
 
     // Initialize EmailJS
     (function() {
@@ -144,7 +144,7 @@
 
       // Email template parameters
       var templateParams = {
-        to_email: 'uniforms@gladevillepublic.nsw.edu.au', // Replace with your email
+        to_email: 'soulorganiser4u@gmail.com',
         customer_name: order.customer.name,
         customer_whatsapp: order.customer.whatsapp,
         customer_class: order.customer.studentClass,
@@ -164,7 +164,7 @@
         .catch(function(error) {
           console.error('Failed to send email:', error);
           // Fallback to mailto link if EmailJS fails
-          var mailtoLink = 'mailto:uniforms@gladevillepublic.nsw.edu.au' +
+          var mailtoLink = 'mailto:soulorganiser4u@gmail.com' +
             '?subject=' + encodeURIComponent('New Uniform Pre-Order - ' + order.customer.name) +
             '&body=' + encodeURIComponent(formatOrderForEmail(order));
           window.open(mailtoLink);
