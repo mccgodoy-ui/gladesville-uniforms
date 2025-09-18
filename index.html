@@ -22,6 +22,11 @@
     .card { background:#fff; border-radius:18px; box-shadow:0 6px 18px rgba(16,24,40,.08); }
     .soft-panel { background:linear-gradient(120deg,#eaf7f6,#f5fbff); border-left:4px solid var(--brand-teal); border-radius:18px; }
     .field { border:1px solid #e5e7eb; border-radius:12px; padding:.65rem .9rem; width:100%; }
+    .banner-image { 
+      background: linear-gradient(rgba(15, 61, 99, 0.7), rgba(15, 139, 141, 0.7)), 
+                  url('https://images.pexels.com/photos/5905709/pexels-photo-5905709.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1') center/cover;
+      min-height: 200px;
+    }
   </style>
 </head>
 <body class="bg-gray-50">
@@ -116,6 +121,43 @@
     function updateWhatsApp(value) { customerInfo.whatsapp = value; }
     function updateClass(value) { customerInfo.studentClass = value; }
     function updateNotes(value) { customerInfo.notes = value; }
+    // Email notification function
+    function sendEmailNotification(order) {
+      // Using EmailJS service - you'll need to set this up
+      var emailData = {
+        to_email: 'uniforms@gladevillepublic.nsw.edu.au', // Replace with your email
+        subject: 'New Uniform Pre-Order - ' + order.customer.name,
+        message: formatOrderForEmail(order)
+      };
+      
+      // For now, we'll use a simple mailto link as fallback
+      var mailtoLink = 'mailto:uniforms@gladevillepublic.nsw.edu.au' +
+        '?subject=' + encodeURIComponent('New Uniform Pre-Order - ' + order.customer.name) +
+        '&body=' + encodeURIComponent(formatOrderForEmail(order));
+      
+      // Try to open email client
+      window.open(mailtoLink);
+    }
+
+    function formatOrderForEmail(order) {
+      var emailBody = 'NEW UNIFORM PRE-ORDER\n\n';
+      emailBody += 'Customer Details:\n';
+      emailBody += 'Name: ' + order.customer.name + '\n';
+      emailBody += 'WhatsApp: ' + order.customer.whatsapp + '\n';
+      emailBody += 'Class: ' + order.customer.studentClass + '\n';
+      emailBody += 'Date: ' + order.date + ' at ' + order.time + '\n';
+      if (order.customer.notes) {
+        emailBody += 'Notes: ' + order.customer.notes + '\n';
+      }
+      emailBody += '\nItems Ordered:\n';
+      for (var key in order.items) {
+        var item = order.items[key];
+        emailBody += '• ' + item.quantity + 'x ' + item.name + ' (Size ' + item.size + ') - $' + (item.price * item.quantity) + '\n';
+      }
+      emailBody += '\nTotal: $' + order.total + '\n\n';
+      emailBody += 'Please contact the customer via WhatsApp to arrange photo sharing and payment.';
+      return emailBody;
+    }
 
     function submitOrder() {
       if (!customerInfo.name || !customerInfo.whatsapp || !customerInfo.studentClass) {
@@ -137,6 +179,10 @@
       };
 
       orders.push(order);
+      
+      // Send email notification
+      sendEmailNotification(order);
+      
       cart = {};
       customerInfo = {name:'', whatsapp:'', studentClass:'', notes:''};
       showSuccessMessage = true;
@@ -262,10 +308,17 @@
       var cartCount = getCartCount();
       var orderCount = orders.length;
 
-      return '<div class="bg-blue-900 text-white p-4">' +
+      return '<div class="banner-image text-white">' +
+        '<div class="bg-blue-900 bg-opacity-90 p-4">' +
         '<div class="max-w-6xl mx-auto flex justify-between items-center">' +
           '<div>' +
-            '<h1 class="text-2xl font-bold">Pre-Loved Uniforms</h1>' +
+            '<h1 class="text-2xl font-bold flex items-center gap-2">' +
+              '<svg class="w-8 h-8 text-green-400" fill="currentColor" viewBox="0 0 24 24">' +
+                '<path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"/>' +
+                '<path d="M17.66 8L18.5 10.5L21 11.34L18.5 12.16L17.66 14.66L16.84 12.16L14.34 11.34L16.84 10.5L17.66 8M6.34 8L7.16 10.5L9.66 11.34L7.16 12.16L6.34 14.66L5.5 12.16L3 11.34L5.5 10.5L6.34 8Z"/>' +
+              '</svg>' +
+              'Pre-Loved Uniforms' +
+            '</h1>' +
             '<p class="text-blue-200">Gladesville Public School</p>' +
           '</div>' +
           '<div class="flex gap-4 items-center">' +
@@ -278,6 +331,7 @@
               (cartCount > 0 ? '<span class="absolute -top-1 -right-1 bg-yellow-400 text-black rounded-full w-5 h-5 text-xs">' + cartCount + '</span>' : '') +
             '</div>' +
           '</div>' +
+        '</div>' +
         '</div>' +
       '</div>';
     }
