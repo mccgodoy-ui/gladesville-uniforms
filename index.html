@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pre-Loved Uniforms - Gladesville Public School</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     :root{
       --brand-navy:#0f3d63;
@@ -33,6 +34,16 @@
   <div id="app">Loading...</div>
 
   <script>
+    // EmailJS Configuration - Replace with your actual values
+    var EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID';
+    var EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
+    var EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY';
+
+    // Initialize EmailJS
+    (function() {
+      emailjs.init(EMAILJS_PUBLIC_KEY);
+    })();
+
     // State
     var currentView = 'shop';
     var cart = {};
@@ -121,22 +132,43 @@
     function updateWhatsApp(value) { customerInfo.whatsapp = value; }
     function updateClass(value) { customerInfo.studentClass = value; }
     function updateNotes(value) { customerInfo.notes = value; }
-    // Email notification function
+
+    // Email notification function using EmailJS
     function sendEmailNotification(order) {
-      // Using EmailJS service - you'll need to set this up
-      var emailData = {
+      // Format items list for email
+      var itemsList = '';
+      for (var key in order.items) {
+        var item = order.items[key];
+        itemsList += item.quantity + 'x ' + item.name + ' (Size ' + item.size + ') - $' + (item.price * item.quantity) + '\n';
+      }
+
+      // Email template parameters
+      var templateParams = {
         to_email: 'uniforms@gladevillepublic.nsw.edu.au', // Replace with your email
-        subject: 'New Uniform Pre-Order - ' + order.customer.name,
-        message: formatOrderForEmail(order)
+        customer_name: order.customer.name,
+        customer_whatsapp: order.customer.whatsapp,
+        customer_class: order.customer.studentClass,
+        customer_notes: order.customer.notes || 'None',
+        order_date: order.date,
+        order_time: order.time,
+        items_list: itemsList,
+        order_total: order.total,
+        order_id: order.id
       };
-      
-      // For now, we'll use a simple mailto link as fallback
-      var mailtoLink = 'mailto:uniforms@gladevillepublic.nsw.edu.au' +
-        '?subject=' + encodeURIComponent('New Uniform Pre-Order - ' + order.customer.name) +
-        '&body=' + encodeURIComponent(formatOrderForEmail(order));
-      
-      // Try to open email client
-      window.open(mailtoLink);
+
+      // Send email using EmailJS
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+        .then(function(response) {
+          console.log('Email sent successfully!', response.status, response.text);
+        })
+        .catch(function(error) {
+          console.error('Failed to send email:', error);
+          // Fallback to mailto link if EmailJS fails
+          var mailtoLink = 'mailto:uniforms@gladevillepublic.nsw.edu.au' +
+            '?subject=' + encodeURIComponent('New Uniform Pre-Order - ' + order.customer.name) +
+            '&body=' + encodeURIComponent(formatOrderForEmail(order));
+          window.open(mailtoLink);
+        });
     }
 
     function formatOrderForEmail(order) {
