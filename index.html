@@ -45,11 +45,15 @@
     .card{ background:#fff;border-radius:1rem;box-shadow:0 6px 24px rgba(16,24,40,.08) }
     .badge{ background:#fff;color:#0f8b8d;border:1px solid #c7ecea;border-radius:9999px;padding:.25rem .6rem;font-size:.75rem;font-weight:600 }
     .sticky-card{ position:sticky; top:1rem }
-    /* Replace BANNER_IMAGE_URL with your uploaded image URL (Lovable) or /images/banner.jpg (GitHub) */
     .banner{
-      background:
-        linear-gradient(180deg,rgba(15,61,99,.78),rgba(15,139,141,.52)),
-        url('BANNER_IMAGE_URL') center/cover no-repeat;
+  background:
+    linear-gradient(180deg, rgba(15,61,99,.78), rgba(15,139,141,.52)),
+    url('./images/banner.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+ center/cover no-repeat;
     }
   </style>
 </head>
@@ -262,7 +266,6 @@
     function login(){ const pwd = prompt('Enter admin password:'); if (!pwd) return; if (pwd=== 'gps25'){ isAdminLoggedIn=true; currentView='admin'; render(); } else alert('Incorrect password'); }
     const logout=()=>{ isAdminLoggedIn=false; currentView='shop'; render(); };
     const goToShop=()=>{ currentView='shop'; render(); };
-    let editingItemId = null;
     function startEdit(id){ editingItemId=id; render(); }
     function cancelEdit(){ editingItemId=null; render(); }
     function saveEdit(id){
@@ -558,5 +561,12 @@ TOTAL: $${o.total}`;
     function render(){ document.getElementById('app').innerHTML = (currentView==='admin') ? adminView() : shopView(); }
     render();
   </script>
+  window.onerror = (msg, src, line, col, err) => {
+  const box = document.createElement('pre');
+  box.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;background:#fee;border:1px solid #f99;padding:10px;border-radius:8px;z-index:9999;white-space:pre-wrap';
+  box.textContent = 'JS Error: ' + msg + '\n' + (err?.stack || (src+':'+line+':'+col));
+  document.body.appendChild(box);
+};
+
 </body>
 </html>
