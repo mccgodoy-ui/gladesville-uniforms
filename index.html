@@ -14,10 +14,13 @@
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: { display: ['"DM Serif Display"', 'serif'], sans: ['Outfit','ui-sans-serif','system-ui'] },
+          fontFamily: { display: ['"DM Serif Display"','serif'], sans: ['Outfit','ui-sans-serif','system-ui'] },
           colors: {
-            brandNavy:'#0f3d63', brandTeal:'#0f8b8d', brandAmber:'#f59e0b',
-            softSky:'#eaf7f6', softMint:'#e6faf9'
+            brandNavy:'#0f3d63',
+            brandTeal:'#0f8b8d',
+            brandYellow:'#facc15', /* brighter yellow */
+            softSky:'#eaf7f6',
+            softMint:'#e6faf9'
           },
           boxShadow: { card:'0 10px 30px rgba(16,24,40,.08)' },
           borderRadius: { xxl: '1.25rem' }
@@ -30,9 +33,9 @@
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
   <style>
-    :root{ --brand-navy:#0f3d63; --brand-teal:#0f8b8d; --brand-amber:#f59e0b; }
+    :root{ --brand-navy:#0f3d63; --brand-teal:#0f8b8d; --brand-yellow:#facc15; }
     .pill{ padding:.5rem .9rem;border-radius:9999px;font-size:.875rem;font-weight:600;transition:all .15s }
-    .pill-active{ background:var(--brand-amber);color:#1f2937;box-shadow:0 6px 14px rgba(245,158,11,.25) }
+    .pill-active{ background:var(--brand-yellow);color:#1f2937;box-shadow:0 6px 14px rgba(250,204,21,.25) }
     .pill-idle{ background:#fff;color:#0f3d63;border:1px solid #e5e7eb }
     .pill-idle:hover{ background:#f7fafc }
     .chip{ border-radius:9999px;padding:.45rem .8rem;border:1px solid #cbd5e1 }
@@ -42,8 +45,7 @@
     .card{ background:#fff;border-radius:1rem;box-shadow:0 6px 24px rgba(16,24,40,.08) }
     .badge{ background:#fff;color:#0f8b8d;border:1px solid #c7ecea;border-radius:9999px;padding:.25rem .6rem;font-size:.75rem;font-weight:600 }
     .sticky-card{ position:sticky; top:1rem }
-
-    /* Replace BANNER_IMAGE_URL with your uploaded image URL in Lovable */
+    /* Replace BANNER_IMAGE_URL with your uploaded image URL (Lovable) or /images/banner.jpg (GitHub) */
     .banner{
       background:
         linear-gradient(180deg,rgba(15,61,99,.78),rgba(15,139,141,.52)),
@@ -52,20 +54,20 @@
   </style>
 </head>
 <body class="bg-gray-50 text-slate-800 font-sans">
-  <!-- ===== HERO / BANNER ===== -->
+  <!-- HERO -->
   <header class="banner text-white">
     <div class="max-w-6xl mx-auto px-4 py-10 md:py-14">
       <div class="flex items-center gap-2 mb-3 flex-wrap">
         <span class="badge bg-white/90 text-brandNavy border-none">Community volunteers</span>
-        <span class="badge bg-white/90 text-brandTeal border-none">Pick up @ New Hub (Linsley St.)</span>
+        <!-- removed “Pick up @ New Hub (Linsley St.)” by request -->
         <span class="badge bg-white/95 text-emerald-700 border-emerald-300">♻️ Sustainable — Reuse & Donate</span>
       </div>
       <h1 class="font-display text-3xl md:text-5xl leading-tight">Pre-Loved Uniform Shop</h1>
       <p class="mt-3 max-w-2xl text-white/90">
-        Save money, reduce waste, and kit out our kids. Pre-order in minutes — we’ll confirm availability and send photos via WhatsApp.
+        Save money, reduce waste, and kit out our kids.
       </p>
       <div class="mt-6 flex flex-wrap gap-3">
-        <a href="#shop" class="inline-flex items-center gap-2 bg-brandAmber text-slate-900 font-semibold rounded-2xl px-5 py-3">
+        <a href="#shop" class="inline-flex items-center gap-2 bg-brandYellow text-slate-900 font-semibold rounded-2xl px-5 py-3">
           Start Pre-Order <span aria-hidden>→</span>
         </a>
         <a href="#how" class="inline-flex items-center gap-2 border border-white/30 rounded-2xl px-5 py-3">How it works</a>
@@ -73,25 +75,38 @@
     </div>
   </header>
 
-  <!-- ===== APP ROOT ===== -->
   <main id="app" class="max-w-6xl mx-auto px-4 py-8">Loading…</main>
+
+  <!-- Volunteer callout section -->
+  <section class="max-w-4xl mx-auto my-12 card p-8 text-center">
+    <h2 class="text-2xl font-display text-brandNavy mb-3">We need volunteers!</h2>
+    <p class="text-slate-600 mb-4">
+      The uniform shop runs on community spirit 🌸. If you can help with sorting, sales, or admin, we’d love to hear from you.
+    </p>
+    <a href="#shop" class="inline-block bg-brandYellow text-slate-900 px-6 py-3 rounded-xl font-semibold">
+      Put me down to help
+    </a>
+    <p class="mt-4 text-xs text-slate-500">
+      Donation bins are located at the <strong>School Admin area</strong> — thank you for supporting reuse ♻️
+    </p>
+  </section>
 
   <footer class="mt-10 py-8 text-center text-sm text-slate-500">
     © Gladesville Public School Uniform Shop — Community volunteers
   </footer>
 
   <script>
-    /* ===========================
-       CONFIG (EmailJS)
-       =========================== */
+    /* ===== EmailJS config ===== */
     const EMAILJS_SERVICE_ID = 'service_z6psqlh';
     const EMAILJS_TEMPLATE_ID = 'template_6t31ggp';
     const EMAILJS_PUBLIC_KEY  = 'SqZoo_2xHoSq2VLVb';
     (function(){ emailjs.init(EMAILJS_PUBLIC_KEY); })();
 
-    /* ===========================
-       STATE
-       =========================== */
+    /* ===== Optional: Google Sheets logging (set URL or leave blank to disable) ===== */
+    const SHEETS_WEB_APP_URL = ''; // e.g. 'https://script.google.com/macros/s/AKfycb.../exec'
+    const SHEETS_ENABLED = !!SHEETS_WEB_APP_URL;
+
+    /* ===== State ===== */
     let currentView = 'shop';
     let cart = JSON.parse(localStorage.getItem('gps_cart') || '{}');
     let customerInfo = JSON.parse(localStorage.getItem('gps_customer') || JSON.stringify({
@@ -119,14 +134,22 @@
     const sizes = ['4','6','8','10','12','14','16'];
     const categories = ['All','Shirts','Bottoms','Dresses','Winter','Accessories'];
 
-    /* ===========================
-       HELPERS
-       =========================== */
+    /* ===== Helpers ===== */
     const saveLocal = () => {
       localStorage.setItem('gps_cart', JSON.stringify(cart));
       localStorage.setItem('gps_customer', JSON.stringify(customerInfo));
       localStorage.setItem('gps_orders', JSON.stringify(orders));
     };
+    const setCategory = c => { activeCategory = c; render(); };
+    const setSearch = v => { searchQuery = v; render(); };
+    const updateName  = v => { customerInfo.name = v; saveLocal(); };
+    const updateWhats = v => { customerInfo.whatsapp = v; saveLocal(); };
+    const updateClass = v => { customerInfo.studentClass = v; saveLocal(); };
+    const updateNotes = v => { customerInfo.notes = v; saveLocal(); };
+    const updateVol   = v => { customerInfo.volunteer = v; saveLocal(); };
+    const updateAvail = v => { customerInfo.volunteerAvailability = v; saveLocal(); };
+    const getCartTotal = () => Object.values(cart).reduce((s,i)=> s + i.price*i.quantity, 0);
+    const getCartCount = () => Object.values(cart).reduce((s,i)=> s + i.quantity, 0);
 
     function filteredInventory() {
       let items = (activeCategory === 'All') ? inventory : inventory.filter(i => i.category === activeCategory);
@@ -136,7 +159,6 @@
       }
       return items;
     }
-
     function addToCart(id, size) {
       const item = inventory.find(i => i.id === id);
       if (!item) return;
@@ -150,17 +172,6 @@
       if (cart[key].quantity > 1) cart[key].quantity -= 1; else delete cart[key];
       saveLocal(); render();
     }
-    const getCartTotal = () => Object.values(cart).reduce((s,i)=> s + i.price*i.quantity, 0);
-    const getCartCount = () => Object.values(cart).reduce((s,i)=> s + i.quantity, 0);
-    const setCategory = c => { activeCategory = c; render(); };
-    const setSearch = v => { searchQuery = v; render(); };
-
-    const updateName  = v => { customerInfo.name = v; saveLocal(); };
-    const updateWhats = v => { customerInfo.whatsapp = v; saveLocal(); };
-    const updateClass = v => { customerInfo.studentClass = v; saveLocal(); };
-    const updateNotes = v => { customerInfo.notes = v; saveLocal(); };
-    const updateVol   = v => { customerInfo.volunteer = v; saveLocal(); };
-    const updateAvail = v => { customerInfo.volunteerAvailability = v; saveLocal(); };
 
     function formatItemsList(obj) {
       return Object.values(obj).map(it => `${it.quantity}x ${it.name} (Size ${it.size}) - $${(it.price*it.quantity)}`).join('\n');
@@ -171,7 +182,7 @@
       if (order.customer.notes) msg += `Notes: ${order.customer.notes}\n`;
       msg += `Volunteer: ${order.customer.volunteer ? 'Yes' : 'No'}\n`;
       if (order.customer.volunteer && order.customer.volunteerAvailability) msg += `Volunteer availability: ${order.customer.volunteerAvailability}\n`;
-      msg += `\nItems Ordered:\n${formatItemsList(order.items)}\n\nTotal: $${order.total}\n\nPlease contact via WhatsApp to arrange photos & payment.`;
+      msg += `\nItems Ordered:\n${formatItemsList(order.items)}\n\nTotal: $${order.total}\n`;
       return msg;
     }
     function toast(msg, ok=true) {
@@ -180,10 +191,8 @@
       t.textContent = msg; document.body.appendChild(t); setTimeout(()=> t.remove(), 2200);
     }
 
-    /* ===========================
-       EMAIL SEND
-       =========================== */
-    async function sendEmailNotification(order) {
+    /* ===== Email + optional Sheets ===== */
+    async function sendEmail(order) {
       const params = {
         to_email: 'soulorganiser4u@gmail.com',
         customer_name: order.customer.name,
@@ -196,21 +205,19 @@
         volunteer: order.customer.volunteer ? 'Yes' : 'No',
         volunteer_availability: order.customer.volunteerAvailability || 'N/A'
       };
+      await emailjs.send('service_z6psqlh','template_6t31ggp',params);
+    }
+    async function sendToSheet(order){
+      if (!SHEETS_ENABLED) return;
       try {
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params);
-        return true;
-      } catch (err) {
-        console.error('EmailJS failed, fallback to mailto:', err);
-        const mailto = 'mailto:soulorganiser4u@gmail.com'
-          + '?subject=' + encodeURIComponent('New Uniform Pre-Order - ' + order.customer.name)
-          + '&body=' + encodeURIComponent(formatOrderForEmail(order));
-        window.open(mailto); return false;
-      }
+        await fetch(SHEETS_WEB_APP_URL, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(order)
+        });
+      } catch(e){ console.error('Sheets logging failed', e); }
     }
 
-    /* ===========================
-       SUBMIT
-       =========================== */
     async function submitOrder() {
       if (!customerInfo.name || !customerInfo.whatsapp || !customerInfo.studentClass) {
         toast('Please fill your name, WhatsApp and class.', false); return;
@@ -227,25 +234,36 @@
         date: new Date().toLocaleDateString(),
         time: new Date().toLocaleTimeString()
       };
-      orders.push(order); saveLocal();
 
-      const ok = await sendEmailNotification(order);
+      try {
+        await Promise.all([ sendEmail(order), sendToSheet(order) ]);
+        toast('Order sent! We’ll be in touch.', true);
+      } catch(e){
+        console.error(e);
+        // fall back: open a mailto with the order text
+        const mailto = 'mailto:soulorganiser4u@gmail.com'
+          + '?subject=' + encodeURIComponent('New Uniform Pre-Order - ' + order.customer.name)
+          + '&body=' + encodeURIComponent(formatOrderForEmail(order));
+        window.open(mailto);
+        toast('Email app opened as fallback.', true);
+      }
 
+      // Clear cart & fields but keep class for convenience
+      orders.push(order);
       cart = {};
       customerInfo = { name:'', whatsapp:'', studentClass: order.customer.studentClass, notes:'', volunteer:false, volunteerAvailability:'' };
       saveLocal();
 
       isSubmitting = false; showSuccessMessage = true; render();
-      toast(ok ? 'Order sent! We’ll confirm on WhatsApp.' : 'Order prepared. Email app opened.', ok);
       setTimeout(()=> { showSuccessMessage = false; render(); }, 3500);
     }
 
-    /* ===========================
-       ADMIN
-       =========================== */
+    /* ===== Admin etc. (unchanged except colour) ===== */
+    let orders = JSON.parse(localStorage.getItem('gps_orders') || '[]');
     function login(){ const pwd = prompt('Enter admin password:'); if (!pwd) return; if (pwd=== 'gps25'){ isAdminLoggedIn=true; currentView='admin'; render(); } else alert('Incorrect password'); }
     const logout=()=>{ isAdminLoggedIn=false; currentView='shop'; render(); };
     const goToShop=()=>{ currentView='shop'; render(); };
+    let editingItemId = null;
     function startEdit(id){ editingItemId=id; render(); }
     function cancelEdit(){ editingItemId=null; render(); }
     function saveEdit(id){
@@ -265,7 +283,7 @@
       document.getElementById('new_name').value=''; document.getElementById('new_price').value='';
       render();
     }
-    function deleteOrder(id){ orders = orders.filter(o=>o.id!==id); saveLocal(); render(); }
+    function deleteOrder(id){ orders = orders.filter(o=>o.id!==id); localStorage.setItem('gps_orders', JSON.stringify(orders)); render(); }
     function copyOrder(id){
       const o = orders.find(x=>x.id===id);
       const text =
@@ -280,12 +298,10 @@ ${o.customer.volunteer && o.customer.volunteerAvailability ? 'Availability: ' + 
 ITEMS:
 ${Object.values(o.items).map(i=> `${i.quantity}x ${i.name} (Size ${i.size})`).join('\n')}
 TOTAL: $${o.total}`;
-      navigator.clipboard?.writeText(text); toast('Order copied to clipboard.');
+      navigator.clipboard?.writeText(text);
+      alert('Order copied to clipboard.');
     }
 
-    /* ===========================
-       RENDER PIECES
-       =========================== */
     function headerBar(){
       const cartCount = getCartCount();
       const orderCount = orders.length;
@@ -305,13 +321,12 @@ TOTAL: $${o.total}`;
             </button>
             <div class="relative" title="Cart">
               <span class="text-xl">🛒</span>
-              ${cartCount>0? `<span class="absolute -top-1 -right-1 bg-brandAmber text-black rounded-full w-5 h-5 text-xs grid place-items-center">${cartCount}</span>`:``}
+              ${cartCount>0? `<span class="absolute -top-1 -right-1 bg-brandYellow text-black rounded-full w-5 h-5 text-xs grid place-items-center">${cartCount}</span>`:``}
             </div>
           </div>
         </div>
       `;
     }
-
     function infoBlock(){
       return `
         <a id="how"></a>
@@ -320,8 +335,8 @@ TOTAL: $${o.total}`;
           <ol class="mt-3 grid sm:grid-cols-2 gap-2 text-sm">
             <li>1) Select items and sizes.</li>
             <li>2) Submit your pre-order.</li>
-            <li>3) We’ll send photos via <strong>WhatsApp</strong>.</li>
-            <li>4) Pay via <strong>Qkr!</strong> or cash on pickup.</li>
+            <li>3) We’ll confirm availability.</li>
+            <li>4) Pay via Qkr! or cash on pickup.</li>
           </ol>
           <div class="mt-3 text-xs text-slate-600">
             <strong>Donation bins:</strong> located at the <em>School Admin area</em>. Thank you for supporting reuse ♻️
@@ -329,7 +344,6 @@ TOTAL: $${o.total}`;
         </div>
       `;
     }
-
     function filters(){
       const pills = categories.map(c=>{
         const active = c===activeCategory;
@@ -346,7 +360,6 @@ TOTAL: $${o.total}`;
         </div>
       `;
     }
-
     function productGrid(){
       const items = filteredInventory();
       if (!items.length) return `<p class="text-center text-slate-500 py-8">No items found.</p>`;
@@ -368,7 +381,6 @@ TOTAL: $${o.total}`;
       }).join('');
       return `<div class="grid md:grid-cols-2 gap-5">${cards}</div>`;
     }
-
     function cartPanel(){
       const keys = Object.keys(cart);
       const total = getCartTotal();
@@ -398,7 +410,7 @@ TOTAL: $${o.total}`;
           <div class="p-5 space-y-3">
             ${showSuccessMessage?`
               <div class="rounded-lg bg-green-50 border border-green-200 text-green-800 px-3 py-2 text-sm">
-                Order submitted! We’ll confirm on WhatsApp shortly.
+                Order submitted! We’ll be in touch shortly.
               </div>`:''}
 
             <div class="space-y-3">
@@ -424,7 +436,7 @@ TOTAL: $${o.total}`;
 
             <button onclick="submitOrder()" ${canSubmit?'':'disabled'}
               class="w-full inline-flex items-center justify-center rounded-xl px-5 py-3 font-semibold
-                ${canSubmit? 'bg-brandAmber text-slate-900 hover:opacity-90' : 'bg-slate-200 text-slate-500'}">
+                ${canSubmit? 'bg-brandYellow text-slate-900 hover:opacity-90' : 'bg-slate-200 text-slate-500'}">
               ${isSubmitting? 'Sending…' : 'Submit Pre-Order'}
             </button>
 
@@ -435,7 +447,6 @@ TOTAL: $${o.total}`;
         </div>
       `;
     }
-
     function shopView(){
       return `
         ${headerBar()}
@@ -449,7 +460,6 @@ TOTAL: $${o.total}`;
         </section>
       `;
     }
-
     function adminView(){
       if (!isAdminLoggedIn) {
         return `
@@ -466,7 +476,6 @@ TOTAL: $${o.total}`;
           </div>
         `;
       }
-
       const inventoryList = inventory.map(it=>{
         if (editingItemId===it.id) {
           return `
@@ -491,7 +500,6 @@ TOTAL: $${o.total}`;
             </div>
           </div>`;
       }).join('');
-
       const ordersList = orders.map(o=>{
         const list = Object.values(o.items).map(i=> `<div class="text-sm">• ${i.quantity}x ${i.name} (Size ${i.size})</div>`).join('');
         return `
@@ -515,7 +523,6 @@ TOTAL: $${o.total}`;
             <div class="space-y-1">${list}</div>
           </div>`;
       }).join('');
-
       return `
         ${headerBar()}
         <section class="space-y-6">
@@ -526,7 +533,6 @@ TOTAL: $${o.total}`;
               <button onclick="goToShop()" class="bg-brandTeal text-white px-3 py-2 rounded-lg">Shop</button>
             </div>
           </div>
-
           <div class="card p-4">
             <h2 class="text-xl font-semibold mb-4">Inventory (${inventory.length})</h2>
             <div class="space-y-2 mb-4">${inventoryList}</div>
@@ -540,10 +546,9 @@ TOTAL: $${o.total}`;
                 <option value="Winter">Winter</option>
                 <option value="Accessories">Accessories</option>
               </select>
-              <button onclick="addItem()" class="bg-brandAmber text-slate-900 px-4 py-2 rounded-lg font-semibold">Add Item</button>
+              <button onclick="addItem()" class="bg-brandYellow text-slate-900 px-4 py-2 rounded-lg font-semibold">Add Item</button>
             </div>
           </div>
-
           <div class="card p-4">
             <h2 class="text-xl font-semibold mb-4">Orders (${orders.length})</h2>
             <div class="space-y-4">${ordersList || '<p class="text-slate-500">No orders yet</p>'}</div>
@@ -551,13 +556,7 @@ TOTAL: $${o.total}`;
         </section>
       `;
     }
-
-    function render(){
-      const root = document.getElementById('app');
-      root.innerHTML = (currentView==='admin') ? adminView() : shopView();
-    }
-
-    /* INIT */
+    function render(){ document.getElementById('app').innerHTML = (currentView==='admin') ? adminView() : shopView(); }
     render();
   </script>
 </body>
