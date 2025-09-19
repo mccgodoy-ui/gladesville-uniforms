@@ -259,7 +259,6 @@
     }
 
     /* ===== Admin etc. (unchanged except colour) ===== */
-    let orders = JSON.parse(localStorage.getItem('gps_orders') || '[]');
     function login(){ const pwd = prompt('Enter admin password:'); if (!pwd) return; if (pwd=== 'gps25'){ isAdminLoggedIn=true; currentView='admin'; render(); } else alert('Incorrect password'); }
     const logout=()=>{ isAdminLoggedIn=false; currentView='shop'; render(); };
     const goToShop=()=>{ currentView='shop'; render(); };
