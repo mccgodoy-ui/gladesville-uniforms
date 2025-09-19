@@ -312,7 +312,7 @@ TOTAL: $${o.total}`;
           <div class="flex items-center gap-2">
             <span class="w-9 h-9 rounded-full bg-brandTeal/10 flex items-center justify-center">👕</span>
             <div>
-              <h2 class="font-display text-xl text-brandNavy leading-tight">Gladesville PS Uniforms</h2>
+              <h2 class="font-display text-xl text-brandNavy leading-tight">Gladesville Public School Second-Hand Uniforms</h2>
               <p class="text-xs text-slate-500 -mt-0.5">Pre-order & pickup</p>
             </div>
           </div>
@@ -561,12 +561,5 @@ TOTAL: $${o.total}`;
     function render(){ document.getElementById('app').innerHTML = (currentView==='admin') ? adminView() : shopView(); }
     render();
   </script>
-  window.onerror = (msg, src, line, col, err) => {
-  const box = document.createElement('pre');
-  box.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;background:#fee;border:1px solid #f99;padding:10px;border-radius:8px;z-index:9999;white-space:pre-wrap';
-  box.textContent = 'JS Error: ' + msg + '\n' + (err?.stack || (src+':'+line+':'+col));
-  document.body.appendChild(box);
-};
-
 </body>
 </html>
