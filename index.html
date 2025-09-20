@@ -10,30 +10,26 @@
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { display: ['"DM Serif Display"','serif'], sans: ['Outfit','ui-sans-serif','system-ui'] },
-          colors: {
-            brandNavy:'#0f3d63',
-            brandTeal:'#0f8b8d',
-            brandYellow:'#facc15', /* brighter yellow */
-            softSky:'#eaf7f6',
-            softMint:'#e6faf9'
-          },
-          boxShadow: { card:'0 10px 30px rgba(16,24,40,.08)' },
-          borderRadius: { xxl: '1.25rem' }
-        }
-      }
-    }
-  </script>
 
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
   <style>
     :root{ --brand-navy:#0f3d63; --brand-teal:#0f8b8d; --brand-yellow:#facc15; }
+    /* Tailwind config inline */
+    .font-display { font-family: "DM Serif Display", serif; }
+    .font-sans { font-family: Outfit, ui-sans-serif, system-ui; }
+    .text-brandNavy { color: #0f3d63; }
+    .bg-brandNavy { background-color: #0f3d63; }
+    .text-brandTeal { color: #0f8b8d; }
+    .bg-brandTeal { background-color: #0f8b8d; }
+    .text-brandYellow { color: #facc15; }
+    .bg-brandYellow { background-color: #facc15; }
+    .bg-softSky { background-color: #eaf7f6; }
+    .bg-softMint { background-color: #e6faf9; }
+    .shadow-card { box-shadow: 0 10px 30px rgba(16,24,40,.08); }
+    .rounded-xxl { border-radius: 1.25rem; }
+    
     .pill{ padding:.5rem .9rem;border-radius:9999px;font-size:.875rem;font-weight:600;transition:all .15s }
     .pill-active{ background:var(--brand-yellow);color:#1f2937;box-shadow:0 6px 14px rgba(250,204,21,.25) }
     .pill-idle{ background:#fff;color:#0f3d63;border:1px solid #e5e7eb }
@@ -46,14 +42,56 @@
     .badge{ background:#fff;color:#0f8b8d;border:1px solid #c7ecea;border-radius:9999px;padding:.25rem .6rem;font-size:.75rem;font-weight:600 }
     .sticky-card{ position:sticky; top:1rem }
     .banner{
-  background:
-    linear-gradient(180deg, rgba(15,61,99,.78), rgba(15,139,141,.52)),
-    url('./images/banner.jpg');
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-}
- center/cover no-repeat;
+      background:
+        linear-gradient(135deg, rgba(15,61,99,.85), rgba(15,139,141,.75)),
+        linear-gradient(45deg, #4f46e5, #06b6d4, #10b981);
+      background-size: 400% 400%;
+      animation: gradientShift 8s ease infinite;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 1rem;
+      max-width: 500px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .highlight-section {
+      background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+      border: 2px solid var(--brand-yellow) !important;
+      transform: scale(1.02);
+      transition: all 0.3s ease;
+    }
+    .volunteer-form-animate {
+      animation: slideInUp 0.3s ease-out;
+    }
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
@@ -63,7 +101,7 @@
     <div class="max-w-6xl mx-auto px-4 py-10 md:py-14">
       <div class="flex items-center gap-2 mb-3 flex-wrap">
         <span class="badge bg-white/90 text-brandNavy border-none">Community volunteers</span>
-        <!-- removed “Pick up @ New Hub (Linsley St.)” by request -->
+        <!-- removed "Pick up @ New Hub (Linsley St.)" by request -->
         <span class="badge bg-white/95 text-emerald-700 border-emerald-300">♻️ Sustainable — Reuse & Donate</span>
       </div>
       <h1 class="font-display text-3xl md:text-5xl leading-tight">Pre-Loved Uniform Shop</h1>
@@ -74,7 +112,7 @@
         <a href="#shop" class="inline-flex items-center gap-2 bg-brandYellow text-slate-900 font-semibold rounded-2xl px-5 py-3">
           Start Pre-Order <span aria-hidden>→</span>
         </a>
-        <a href="#how" class="inline-flex items-center gap-2 border border-white/30 rounded-2xl px-5 py-3">How it works</a>
+        <a href="#how" class="inline-flex items-center gap-2 border border-white/30 rounded-2xl px-5 py-3" onclick="event.preventDefault(); scrollToSection('how');">How it works</a>
       </div>
     </div>
   </header>
@@ -85,9 +123,9 @@
   <section class="max-w-4xl mx-auto my-12 card p-8 text-center">
     <h2 class="text-2xl font-display text-brandNavy mb-3">We need volunteers!</h2>
     <p class="text-slate-600 mb-4">
-      The uniform shop runs on community spirit 💛. If you can help with sorting, sales, or admin, we’d love to hear from you.
+      The uniform shop runs on community spirit 💛. If you can help with sorting, sales, or admin, we would love to hear from you.
     </p>
-    <a href="#shop" class="inline-block bg-brandYellow text-slate-900 px-6 py-3 rounded-xl font-semibold">
+    <a href="#shop" class="inline-block bg-brandYellow text-slate-900 px-6 py-3 rounded-xl font-semibold" onclick="event.preventDefault(); openVolunteerModal();">
       Put me down to help
     </a>
     <p class="mt-4 text-xs text-slate-500">
@@ -119,6 +157,9 @@
     let orders = JSON.parse(localStorage.getItem('gps_orders') || '[]');
     let isSubmitting = false;
     let showSuccessMessage = false;
+    let showVolunteerModal = false;
+    let volunteerInfo = { name: '', phone: '' };
+    let isSubmittingVolunteer = false;
     let isAdminLoggedIn = false;
     const adminPassword = 'gps25';
     let editingItemId = null;
@@ -155,6 +196,24 @@
     const getCartTotal = () => Object.values(cart).reduce((s,i)=> s + i.price*i.quantity, 0);
     const getCartCount = () => Object.values(cart).reduce((s,i)=> s + i.quantity, 0);
 
+    // Volunteer modal functions
+    const openVolunteerModal = () => { showVolunteerModal = true; render(); };
+    const closeVolunteerModal = () => { showVolunteerModal = false; volunteerInfo = { name: '', phone: '' }; render(); };
+    const updateVolunteerName = v => { volunteerInfo.name = v; };
+    const updateVolunteerPhone = v => { volunteerInfo.phone = v; };
+
+    // Smooth scroll to section with highlight
+    const scrollToSection = (id) => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+        element.classList.add('highlight-section');
+        setTimeout(() => {
+          element.classList.remove('highlight-section');
+        }, 2000);
+      }
+    };
+
     function filteredInventory() {
       let items = (activeCategory === 'All') ? inventory : inventory.filter(i => i.category === activeCategory);
       if (searchQuery.trim()) {
@@ -181,11 +240,18 @@
       return Object.values(obj).map(it => `${it.quantity}x ${it.name} (Size ${it.size}) - $${(it.price*it.quantity)}`).join('\n');
     }
     function formatOrderForEmail(order) {
-      let msg = `NEW UNIFORM PRE-ORDER\n\nCustomer Details:\n`;
-      msg += `Name: ${order.customer.name}\nWhatsApp: ${order.customer.whatsapp}\nClass: ${order.customer.studentClass}\nDate: ${order.date} at ${order.time}\n`;
+      let msg = `NEW UNIFORM PRE-ORDER\n\n`;
+      msg += `Customer Details:\n`;
+      msg += `Name: ${order.customer.name}\n`;
+      msg += `WhatsApp: ${order.customer.whatsapp}\n`;
+      msg += `Class: ${order.customer.studentClass}\n`;
+      msg += `Date: ${order.date}\n`;
+      msg += `Time: ${order.time}\n`;
       if (order.customer.notes) msg += `Notes: ${order.customer.notes}\n`;
       msg += `Volunteer: ${order.customer.volunteer ? 'Yes' : 'No'}\n`;
-      if (order.customer.volunteer && order.customer.volunteerAvailability) msg += `Volunteer availability: ${order.customer.volunteerAvailability}\n`;
+      if (order.customer.volunteer && order.customer.volunteerAvailability) {
+        msg += `Volunteer Availability: ${order.customer.volunteerAvailability}\n`;
+      }
       msg += `\nItems Ordered:\n${formatItemsList(order.items)}\n\nTotal: $${order.total}\n`;
       return msg;
     }
@@ -198,14 +264,16 @@
     /* ===== Email + optional Sheets ===== */
     async function sendEmail(order) {
       const params = {
-        to_email: 'soulorganiser4u@gmail.com',
+        to_email: 'mccgodoy@gmail.com',
         customer_name: order.customer.name,
         customer_whatsapp: order.customer.whatsapp,
         customer_class: order.customer.studentClass,
         customer_notes: order.customer.notes || 'None',
-        order_date: order.date, order_time: order.time,
+        order_date: order.date, 
+        order_time: order.time,
         items_list: formatItemsList(order.items),
-        order_total: order.total, order_id: order.id,
+        order_total: order.total, 
+        order_id: order.id,
         volunteer: order.customer.volunteer ? 'Yes' : 'No',
         volunteer_availability: order.customer.volunteerAvailability || 'N/A'
       };
@@ -241,11 +309,11 @@
 
       try {
         await Promise.all([ sendEmail(order), sendToSheet(order) ]);
-        toast('Order sent! We’ll be in touch.', true);
+        toast('Order sent! We will be in touch.', true);
       } catch(e){
         console.error(e);
         // fall back: open a mailto with the order text
-        const mailto = 'mailto:soulorganiser4u@gmail.com'
+        const mailto = 'mailto:mccgodoy@gmail.com'
           + '?subject=' + encodeURIComponent('New Uniform Pre-Order - ' + order.customer.name)
           + '&body=' + encodeURIComponent(formatOrderForEmail(order));
         window.open(mailto);
@@ -260,6 +328,62 @@
 
       isSubmitting = false; showSuccessMessage = true; render();
       setTimeout(()=> { showSuccessMessage = false; render(); }, 3500);
+    }
+
+    // Volunteer signup submission
+    async function submitVolunteerSignup() {
+      if (!volunteerInfo.name || !volunteerInfo.phone) {
+        toast('Please fill in both name and phone number.', false);
+        return;
+      }
+
+      isSubmittingVolunteer = true;
+      render();
+
+      const volunteerData = {
+        name: volunteerInfo.name,
+        phone: volunteerInfo.phone,
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString()
+      };
+
+      try {
+        // Send volunteer signup email
+        const params = {
+          to_email: 'mccgodoy@gmail.com',
+          volunteer_name: volunteerData.name,
+          volunteer_phone: volunteerData.phone,
+          signup_date: volunteerData.date,
+          signup_time: volunteerData.time
+        };
+        
+        // You'll need to create a new EmailJS template for volunteer signups
+        // For now, using the same template but with different data
+        await emailjs.send('service_z6psqlh','template_6t31ggp',{
+          ...params,
+          customer_name: volunteerData.name,
+          customer_whatsapp: volunteerData.phone,
+          customer_class: 'VOLUNTEER SIGNUP',
+          items_list: 'New volunteer signup',
+          order_total: 0,
+          customer_notes: `Volunteer signup on ${volunteerData.date} at ${volunteerData.time}`,
+          volunteer: 'Yes',
+          volunteer_availability: 'To be discussed'
+        });
+
+        toast('Thank you! We will be in touch about volunteer opportunities.', true);
+        closeVolunteerModal();
+      } catch(e) {
+        console.error(e);
+        const mailto = 'mailto:mccgodoy@gmail.com'
+          + '?subject=' + encodeURIComponent('New Volunteer Signup - ' + volunteerData.name)
+          + '&body=' + encodeURIComponent(`NEW VOLUNTEER SIGNUP\n\nName: ${volunteerData.name}\nPhone: ${volunteerData.phone}\nDate: ${volunteerData.date}\nTime: ${volunteerData.time}\n\nPlease contact this person about volunteer opportunities.`);
+        window.open(mailto);
+        toast('Email app opened as fallback.', true);
+        closeVolunteerModal();
+      }
+
+      isSubmittingVolunteer = false;
     }
 
     /* ===== Admin etc. (unchanged except colour) ===== */
@@ -288,8 +412,7 @@
     function deleteOrder(id){ orders = orders.filter(o=>o.id!==id); localStorage.setItem('gps_orders', JSON.stringify(orders)); render(); }
     function copyOrder(id){
       const o = orders.find(x=>x.id===id);
-      const text =
-`NEW ORDER
+      const text = `NEW ORDER
 Customer: ${o.customer.name}
 WhatsApp: ${o.customer.whatsapp}
 Class: ${o.customer.studentClass}
@@ -299,8 +422,10 @@ Volunteer: ${o.customer.volunteer ? 'Yes' : 'No'}
 ${o.customer.volunteer && o.customer.volunteerAvailability ? 'Availability: ' + o.customer.volunteerAvailability + '\n' : ''}
 ITEMS:
 ${Object.values(o.items).map(i=> `${i.quantity}x ${i.name} (Size ${i.size})`).join('\n')}
-TOTAL: $${o.total}`;
-      navigator.clipboard?.writeText(text);
+TOTAL: ${o.total}`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text);
+      }
       alert('Order copied to clipboard.');
     }
 
@@ -337,7 +462,7 @@ TOTAL: $${o.total}`;
           <ol class="mt-3 grid sm:grid-cols-2 gap-2 text-sm">
             <li>1) Select items and sizes.</li>
             <li>2) Submit your pre-order.</li>
-            <li>3) We’ll confirm availability.</li>
+            <li>3) We'll confirm availability.</li>
             <li>4) Pay via Qkr! or cash on pickup.</li>
           </ol>
           <div class="mt-3 text-xs text-slate-600">
@@ -412,7 +537,7 @@ TOTAL: $${o.total}`;
           <div class="p-5 space-y-3">
             ${showSuccessMessage?`
               <div class="rounded-lg bg-green-50 border border-green-200 text-green-800 px-3 py-2 text-sm">
-                Order submitted! We’ll be in touch shortly.
+                Order submitted! We will be in touch shortly.
               </div>`:''}
 
             <div class="space-y-3">
@@ -423,7 +548,7 @@ TOTAL: $${o.total}`;
 
               <label class="flex items-start gap-2 text-sm">
                 <input type="checkbox" ${customerInfo.volunteer?'checked':''} onchange="updateVol(this.checked)" />
-                <span><strong>Volunteer with us:</strong> I’m happy to help at the shop or with sorting.</span>
+                <span><strong>Volunteer with us:</strong> I'm happy to help at the shop or with sorting.</span>
               </label>
               <input class="field" placeholder="If volunteering — availability (days/times)" value="${customerInfo.volunteerAvailability||''}" oninput="updateAvail(this.value)" />
             </div>
@@ -433,7 +558,7 @@ TOTAL: $${o.total}`;
             ${keys.length?`
               <div class="border-t pt-3 flex items-center justify-between">
                 <span class="font-semibold">Total</span>
-                <span class="text-xl font-bold text-brandNavy">$${total}</span>
+                <span class="text-xl font-bold text-brandNavy">${total}</span>
               </div>`:''}
 
             <button onclick="submitOrder()" ${canSubmit?'':'disabled'}
@@ -450,6 +575,61 @@ TOTAL: $${o.total}`;
       `;
     }
     function shopView(){
+      const volunteerModal = showVolunteerModal ? `
+        <div class="modal-overlay" onclick="event.target === this && closeVolunteerModal()">
+          <div class="modal-content volunteer-form-animate">
+            <div class="bg-brandTeal text-white px-6 py-4 rounded-t-xl">
+              <h3 class="text-xl font-semibold">Join Our Volunteer Team! 🙌</h3>
+            </div>
+            <div class="p-6 space-y-4">
+              <p class="text-slate-600">Thank you for wanting to help! Please provide your details and we will get in touch about volunteer opportunities.</p>
+              
+              <div class="space-y-3">
+                <input 
+                  class="field" 
+                  placeholder="Your name *" 
+                  value="${volunteerInfo.name}" 
+                  oninput="updateVolunteerName(this.value)" 
+                  ${isSubmittingVolunteer ? 'disabled' : ''}
+                />
+                <input 
+                  class="field" 
+                  placeholder="Phone number *" 
+                  value="${volunteerInfo.phone}" 
+                  oninput="updateVolunteerPhone(this.value)" 
+                  ${isSubmittingVolunteer ? 'disabled' : ''}
+                />
+                
+                <div class="bg-softMint p-3 rounded-lg border border-brandTeal/20">
+                  <p class="text-sm text-slate-700 mb-2">📱 <strong>Join our WhatsApp group:</strong></p>
+                  <a href="https://chat.whatsapp.com/xxx" target="_blank" class="text-brandTeal font-medium text-sm hover:underline">
+                    Click here to join volunteer WhatsApp group
+                  </a>
+                  <p class="text-xs text-slate-500 mt-1">We coordinate volunteer activities through WhatsApp</p>
+                </div>
+              </div>
+
+              <div class="flex gap-3 pt-4">
+                <button 
+                  onclick="submitVolunteerSignup()" 
+                  class="flex-1 bg-brandYellow text-slate-900 py-3 px-4 rounded-xl font-semibold hover:opacity-90 ${isSubmittingVolunteer ? 'opacity-50 cursor-not-allowed' : ''}"
+                  ${isSubmittingVolunteer ? 'disabled' : ''}
+                >
+                  ${isSubmittingVolunteer ? 'Submitting...' : 'Sign me up!'}
+                </button>
+                <button 
+                  onclick="closeVolunteerModal()" 
+                  class="px-4 py-3 border border-slate-300 rounded-xl hover:bg-slate-50 ${isSubmittingVolunteer ? 'opacity-50 cursor-not-allowed' : ''}"
+                  ${isSubmittingVolunteer ? 'disabled' : ''}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ` : '';
+
       return `
         ${headerBar()}
         <section id="shop" class="grid lg:grid-cols-3 gap-6">
@@ -460,6 +640,7 @@ TOTAL: $${o.total}`;
           </div>
           <aside>${cartPanel()}</aside>
         </section>
+        ${volunteerModal}
       `;
     }
     function adminView(){
@@ -496,7 +677,7 @@ TOTAL: $${o.total}`;
               <span class="text-xs bg-slate-100 px-2 py-1 rounded">${it.category}</span>
             </div>
             <div class="flex items-center gap-3">
-              <span class="font-bold text-brandNavy">$${it.price}</span>
+              <span class="font-bold text-brandNavy">${it.price}</span>
               <button onclick="startEdit(${it.id})" class="bg-brandTeal text-white px-2 py-1 rounded text-sm">Edit</button>
               <button onclick="removeItem(${it.id})" class="bg-red-600 text-white px-2 py-1 rounded text-sm">Remove</button>
             </div>
@@ -515,7 +696,7 @@ TOTAL: $${o.total}`;
                 ${o.customer.volunteer ? `<div class="text-xs text-emerald-700 mt-1">Volunteer: Yes — ${o.customer.volunteerAvailability || 'availability TBD'}</div>` : ''}
               </div>
               <div class="text-right">
-                <div class="text-lg font-bold text-brandNavy">$${o.total}</div>
+                <div class="text-lg font-bold text-brandNavy">${o.total}</div>
                 <div class="flex gap-2 mt-2">
                   <button onclick="copyOrder(${o.id})" class="bg-brandTeal text-white px-2 py-1 rounded text-xs">Copy</button>
                   <button onclick="deleteOrder(${o.id})" class="bg-red-600 text-white px-2 py-1 rounded text-xs">Delete</button>
